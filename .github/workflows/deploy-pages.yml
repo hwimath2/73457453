@@ -1,0 +1,45 @@
+name: Auto-Deploy GitHub Pages
+
+on:
+  push:
+    paths:
+      - "index.html"
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+  actions: write
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Debug permissions
+        run: |
+          echo "GitHub token permissions:"
+          echo "${{ toJson(github.token) }}"
+          echo "Repository visibility: ${{ github.repository_visibility }}"
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+        with:
+          enablement: true
+          static_site_generator: "plain_html"
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
